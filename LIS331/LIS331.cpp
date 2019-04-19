@@ -18,7 +18,8 @@
  
 #include "LIS331.h"
 
-LIS331::LIS331(PinName sda, PinName scl) : i2c_(sda, scl) {
+LIS331::LIS331(I2C i2cobj){
+    _i2c = i2cobj
     // set default scaling factor
     scaling_factor = 4096.0;
     

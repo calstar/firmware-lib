@@ -74,7 +74,7 @@ public:
      * @param sda - mbed pin to use for the SDA I2C line.
      * @param scl - mbed pin to use for the SCL I2C line.
      */
-    LIS331(PinName sda, PinName scl);
+    LIS331(I2C i2cobj);
 
     /**
      * Get the identity of the device.
