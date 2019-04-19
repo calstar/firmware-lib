@@ -18,8 +18,8 @@
  
 #include "LIS331.h"
 
-LIS331::LIS331(I2C i2cobj) : i2c_(i2cobj){
-    //i2c_ = i2cobj
+LIS331::LIS331(I2C *i2cobj){
+    i2c_ = i2cobj
     // set default scaling factor
     scaling_factor = 4096.0;
     
@@ -27,7 +27,7 @@ LIS331::LIS331(I2C i2cobj) : i2c_(i2cobj){
     current_range = 0;
 
     //400kHz, fast mode.
-    i2c_.frequency(400000);
+    i2c_->frequency(400000);
     
     
     //Power Up Device, Set Output data rate, Enable All 3 Axis
@@ -38,7 +38,7 @@ LIS331::LIS331(I2C i2cobj) : i2c_(i2cobj){
     tx[0] = CTRL_REG_1;
     //CTRL_REG_1 [00111111] / [0x3F] to power up, set output rate to 1000Hz, and enable all 3 axis.
     tx[1] = 0x3F;
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx, 2);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx, 2);
     
     
     
@@ -49,7 +49,7 @@ LIS331::LIS331(I2C i2cobj) : i2c_(i2cobj){
     tx[0] = CTRL_REG_4;
     tx[1] = 0x10;
         
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx, 2);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx, 2);
     
     
     
@@ -61,9 +61,9 @@ char LIS331::getWhoAmI(void){
     char tx = WHO_AM_I_REG_LIS331;
     char rx;
     
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
     
-    i2c_.read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
+    i2c_->read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
     
     return rx;
 
@@ -78,7 +78,7 @@ void LIS331::setPowerMode(char power_mode){
     tx[0] = CTRL_REG_1;
     tx[1] = power_mode;
 
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx, 2);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx, 2);
 
 }
 
@@ -87,9 +87,9 @@ char LIS331::getPowerMode(void){
     char tx = CTRL_REG_1;
     char rx;
     
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
     
-    i2c_.read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
+    i2c_->read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
 
     
     return rx;
@@ -103,9 +103,9 @@ char LIS331::getInterruptConfiguration(void){
     char tx = CTRL_REG_3;
     char rx;
     
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
     
-    i2c_.read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
+    i2c_->read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
     
     return rx;
 
@@ -125,15 +125,15 @@ char LIS331::setFullScaleRange8g(void){
     // Need to read current register value so we can preserve it
     // Set our device register address to Control Register 4 and read its contents
     tx1 = CTRL_REG_4;
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx1, 1);
-    i2c_.read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx1, 1);
+    i2c_->read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
     
     tx2[0] = CTRL_REG_4;
     rx |= 1 << 5;    // set 6th bit
     rx |= 1 << 4;    // set 5th bit
     tx2[1] = rx;  
     
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx2, 2);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx2, 2);
     return rx;
 }
 
@@ -148,14 +148,14 @@ char LIS331::setFullScaleRange4g(void){
     // Need to read current register value so we can preserve it
     // Set our device register address to Control Register 4 and read its contents
     tx1 = CTRL_REG_4;
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx1, 1);
-    i2c_.read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx1, 1);
+    i2c_->read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
     tx2[0] = CTRL_REG_4;
     rx &= ~(1 << 5);    // Clear 6th bit
     rx |= 1 << 4;       // set 5th bit
     tx2[1] = rx;  
         
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx2, 2);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx2, 2);
     return rx;
 }
     
@@ -171,15 +171,15 @@ char LIS331::setFullScaleRange2g(void){
     // Need to read current register value so we can preserve it
     // Set our device register address to Control Register 4 and read its contents
     tx1 = CTRL_REG_4;
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx1, 1);
-    i2c_.read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx1, 1);
+    i2c_->read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
     
     tx2[0] = CTRL_REG_4;
     rx &= ~(1 << 5);    // Clear 6th bit
     rx &= ~(1 << 4);    // clear 5th bit
     tx2[1] = rx;  
         
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx2, 2);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, tx2, 2);
     return rx;
 }
 
@@ -189,9 +189,9 @@ char LIS331::getAccelStatus(void){
     char tx = STATUS_REG;
     char rx;
     
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
     
-    i2c_.read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
+    i2c_->read((LIS331_I2C_ADDRESS << 1) | 0x01, &rx, 1);
     
     return rx;
 }
@@ -203,9 +203,9 @@ float LIS331::getAccelX(void){
     char tx = ACCEL_XOUT_L_REG | 0x80;
     char rx[2];
     
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
     
-    i2c_.read((LIS331_I2C_ADDRESS << 1) | 0x01, rx, 2);
+    i2c_->read((LIS331_I2C_ADDRESS << 1) | 0x01, rx, 2);
     
     int16_t output = ((int) rx[1] << 8) | ((int) rx[0]);
 
@@ -218,9 +218,9 @@ float LIS331::getAccelY(void){
     char tx = ACCEL_YOUT_L_REG | 0x80;
     char rx[2];
     
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
     
-    i2c_.read((LIS331_I2C_ADDRESS << 1) | 0x01, rx, 2);
+    i2c_->read((LIS331_I2C_ADDRESS << 1) | 0x01, rx, 2);
     
     int16_t output = ((int) rx[1] << 8) | ((int) rx[0]);
 
@@ -233,9 +233,9 @@ float LIS331::getAccelZ(void){
     char tx = ACCEL_ZOUT_L_REG | 0x80;
     char rx[2];
     
-    i2c_.write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
+    i2c_->write((LIS331_I2C_ADDRESS << 1) & 0xFE, &tx, 1);
     
-    i2c_.read((LIS331_I2C_ADDRESS << 1) | 0x01, rx, 2);
+    i2c_->read((LIS331_I2C_ADDRESS << 1) | 0x01, rx, 2);
     
     int16_t output = ((int) rx[1] << 8) | ((int) rx[0]);
 

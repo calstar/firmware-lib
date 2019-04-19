@@ -215,7 +215,7 @@ private:
    float scaling_factor;
    int current_range;
 
-    I2C i2c_;
+    I2C *i2c_;
 
 };
 
