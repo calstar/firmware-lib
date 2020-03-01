@@ -106,7 +106,7 @@ extern "C" {
 /**\name Uncomment the below line to use floating-point compensation */
 #ifndef BMP3_DOUBLE_PRECISION_COMPENSATION
 
-#define BMP3_DOUBLE_PRECISION_COMPENSATION /* Using floating point compensation - STAR, 2020-02-02
+#define BMP3_DOUBLE_PRECISION_COMPENSATION /* Using floating point compensation - STAR, 2020-02-02 */
 #endif
 
 /********************************************************/
