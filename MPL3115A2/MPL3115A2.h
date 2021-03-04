@@ -2,6 +2,7 @@
     Change log from original:
         - debugOut function changed from variadic function to macro
         - readPressure and readAltitude changed to use i2cRead
+        - Serial is bumped to mbed 6
 */
 
 /*
@@ -105,7 +106,7 @@
 #define OFF_T               0x2C //  | 0x00 |         |     | 0x           |
 #define OFF_H               0x2D //  | 0x00 |         |     | 0x           |
 
-#define debugOut(...) if (_debug != NULL) _debug->printf(__VA_ARGS__);
+#define debugOut(...) if (_debug != NULL) fprintf(_debug, __VA_ARGS__);
 
 //! MPL3115A2 I2C Barometric Pressure and Tempurature Sensor Library
 //! This class wraps most of the function in the MPL3115A2 sensor leaving out the FIFO and interrupt system.
@@ -115,7 +116,7 @@ public:
     //! Constructs an MPL3115A2 object and associates an I2C and optional Serial debug object.
     //! @param *i2c The I2C object to use for the sensor.
     //! @param *pc An optional serial debug connection object.
-    MPL3115A2(I2C *i2c, Serial *pc = NULL);
+    MPL3115A2(I2C *i2c, SerialBase *pc = NULL);
 
     //! Initializes the sensor, defaulting to Altitude mode. This should be called before using
     //! the sensor for the first time.
@@ -184,7 +185,7 @@ private:
     //! Set this in the constructor if you want the class to output debug messages.                        
     //! If you need to pair down your code, you can remove this and all the
     //! references to it in the code.
-    Serial *_debug;     
+    FILE *_debug;     
  
     //! Debug method that mimics the printf function, but will output nothing if _debug has not
     //! been set. This means you can safely us it in your code and nothing will happen if you don't
