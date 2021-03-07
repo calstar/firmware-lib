@@ -90,11 +90,11 @@ void RFM69::reset() {
 
   // generate reset impulse
   _rstPin = 1;
-  wait_ms(500);
+  wait_us(500000);
   _rstPin = 0;
 
   // wait until module is ready
-  wait_ms(500);
+  wait_us(500000);
 
   _mode = RFM69_MODE_STANDBY;
 }
@@ -422,7 +422,7 @@ int RFM69::send(const void *data, unsigned int dataLength) {
     while ((false == channelFree()) &&
            ((t.read_ms() - timeEntry) < TIMEOUT_CSMA_READY)) {
       // wait for a random time before checking again
-      wait_ms(rand() % 10);
+      wait_us(rand() % 10 * 1000);
 
       /* try to receive packets while waiting for a free channel
        * and put them into a temporary buffer */
