@@ -9,7 +9,7 @@
 class Bridge {
 public:
     Bridge(SPI* spi_port, PortIn* int_port);
-    int read(int address, char *data, int length, bool repeated=false);
+    int read(int address, char *data, int length);
     int write(int address, const char *data, int length);
 private:
     SPI* spi_port;

@@ -12,7 +12,7 @@ int Bridge::wait() {
     return ret;
 }
 
-int Bridge::read(int address, char *data, int length, bool repeated=false) {
+int Bridge::read(int address, char *data, int length) {
     // Issue read instruction
     uint8_t len = (length < BRIDGE_MAX_LEN) ? BRIDGE_MAX_LEN : 0;
     spi_port->select();
@@ -50,4 +50,3 @@ int Bridge::write(int address, const char *data, int length) {
     if (wait() != BRIDGE_SUCCESS) return -1;
     return len;
 }
-
