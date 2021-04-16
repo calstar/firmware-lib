@@ -3,8 +3,9 @@
 
 #include "stdarg.h" // For debugOut use of the ... parameter and va_list
 
-MPL3115A2::MPL3115A2(I2C *i2c, Serial *pc) : _i2c(i2c), _debug(pc)
+MPL3115A2::MPL3115A2(I2C *i2c, SerialBase *pc) : _i2c(i2c)
 {
+    _debug = fdopen((int)pc, "w");
 }
 
 // By default I set the sensor to altimeter mode. I inserted a 1ms pause 
@@ -13,15 +14,15 @@ MPL3115A2::MPL3115A2(I2C *i2c, Serial *pc) : _i2c(i2c), _debug(pc)
 void MPL3115A2::init()
 {
     setModeStandby();
-    wait_ms(1);
+    wait_us(1000);
     setModeAltimeter();
-    wait_ms(1);
+    wait_us(1000);
     setOversampleRate(7);
-    wait_ms(1);
+    wait_us(1000);
     enableEventFlags();
-    wait_ms(1);
+    wait_us(1000);
     setModeActive();
-    wait_ms(1);
+    wait_us(1000);
 }
 
 // This method wait for a specified amount of time for one of the data
@@ -38,7 +39,7 @@ int MPL3115A2::dataReady(const char mask)
         if(attempts > MAX_DATA_READY_ATTEMPTS) 
             return 0; // Failed
             
-        wait_ms(1);
+        wait_us(1000);
     }
     
     return 1; // Success
