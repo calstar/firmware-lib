@@ -1,9 +1,11 @@
+
+#include "mbed.h"
 #include "bridge.h"
 
 Bridge::Bridge(SPI* spi_port, PortIn* int_port) : spi_port(spi_port), int_port(int_port) {}
 
 int Bridge::wait() {
-    while (int_port->read()) ThisThread::sleep_for(1us);
+    while (int_port->read()) wait_us(1);
     spi_port->select();
     spi_port->write(0x21); // "Read internal register" command
     spi_port->write(0xf0); // "I2CStat" register

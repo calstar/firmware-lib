@@ -15,6 +15,6 @@ private:
     SPI* spi_port;
     PortIn* int_port;
     int wait();
-}
+};
 
 #endif
