@@ -345,7 +345,7 @@ void readGyroData(int16_t * destination)
 void readMagData(int16_t * destination)
 {
   uint8_t rawData[7];  // x/y/z gyro register data, ST2 register stored here, must read ST2 at end of data acquisition
-  if(readByte(AK8963_ADDRESS, AK8963_ST1) & 0x01) { // wait for magnetometer data ready bit to be set
+  if(readByte(AK8963_ADDRESS, AK8963_ST1) & 0x01) { // ThisThread::sleep_for for magnetometer data ready bit to be set
   readBytes(AK8963_ADDRESS, AK8963_XOUT_L, 7, &rawData[0]);  // Read the six raw data and ST2 registers sequentially into data array
   uint8_t c = rawData[6]; // End data read by reading ST2 register
     if(!(c & 0x08)) { // Check if magnetic sensor overflow set, if not then report data
@@ -367,7 +367,7 @@ int16_t readTempData()
 void resetMPU9250() {
   // reset device
   writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x80); // Write a one to bit 7 reset bit; toggle reset device
-  wait(0.1);
+  ThisThread::sleep_for(100ms);
   }
   
   void initAK8963(float * destination)
@@ -375,20 +375,20 @@ void resetMPU9250() {
   // First extract the factory calibration for each magnetometer axis
   uint8_t rawData[3];  // x/y/z gyro calibration data stored here
   writeByte(AK8963_ADDRESS, AK8963_CNTL, 0x00); // Power down magnetometer  
-  wait(0.01);
+  ThisThread::sleep_for(10ms);
   writeByte(AK8963_ADDRESS, AK8963_CNTL, 0x0F); // Enter Fuse ROM access mode
-  wait(0.01);
+  ThisThread::sleep_for(10ms);
   readBytes(AK8963_ADDRESS, AK8963_ASAX, 3, &rawData[0]);  // Read the x-, y-, and z-axis calibration values
   destination[0] =  (float)(rawData[0] - 128)/256.0f + 1.0f;   // Return x-axis sensitivity adjustment values, etc.
   destination[1] =  (float)(rawData[1] - 128)/256.0f + 1.0f;  
   destination[2] =  (float)(rawData[2] - 128)/256.0f + 1.0f; 
   writeByte(AK8963_ADDRESS, AK8963_CNTL, 0x00); // Power down magnetometer  
-  wait(0.01);
+  ThisThread::sleep_for(10ms);
   // Configure the magnetometer for continuous read and highest resolution
   // set Mscale bit 4 to 1 (0) to enable 16 (14) bit resolution in CNTL register,
   // and enable continuous mode data acquisition Mmode (bits [3:0]), 0010 for 8 Hz and 0110 for 100 Hz sample rates
   writeByte(AK8963_ADDRESS, AK8963_CNTL, Mscale << 4 | Mmode); // Set magnetometer data resolution and sample ODR
-  wait(0.01);
+  ThisThread::sleep_for(10ms);
 }
 
 
@@ -397,7 +397,7 @@ void initMPU9250()
  // Initialize MPU9250 device
  // wake up device
   writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x00); // Clear sleep mode bit (6), enable all sensors 
-  wait(0.1); // Delay 100 ms for PLL to get established on x-axis gyro; should check for PLL ready interrupt  
+  ThisThread::sleep_for(100ms); // Delay 100 ms for PLL to get established on x-axis gyro; should check for PLL ready interrupt  
 
  // get stable time source
   writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x01);  // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001
@@ -451,13 +451,13 @@ void calibrateMPU9250(float * dest1, float * dest2)
   
 // reset device, reset all registers, clear gyro and accelerometer bias registers
   writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x80); // Write a one to bit 7 reset bit; toggle reset device
-  wait(0.1);  
+  ThisThread::sleep_for(100ms);  
    
 // get stable time source
 // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001
   writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x01);  
   writeByte(MPU9250_ADDRESS, PWR_MGMT_2, 0x00); 
-  wait(0.2);
+  ThisThread::sleep_for(200ms);
   
 // Configure device for bias calculation
   writeByte(MPU9250_ADDRESS, INT_ENABLE, 0x00);   // Disable all interrupts
@@ -466,7 +466,7 @@ void calibrateMPU9250(float * dest1, float * dest2)
   writeByte(MPU9250_ADDRESS, I2C_MST_CTRL, 0x00); // Disable I2C master
   writeByte(MPU9250_ADDRESS, USER_CTRL, 0x00);    // Disable FIFO and I2C master modes
   writeByte(MPU9250_ADDRESS, USER_CTRL, 0x0C);    // Reset FIFO and DMP
-  wait(0.015);
+  ThisThread::sleep_for(15ms);
   
 // Configure MPU9250 gyro and accelerometer for bias calculation
   writeByte(MPU9250_ADDRESS, CONFIG, 0x01);      // Set low-pass filter to 188 Hz
@@ -480,7 +480,7 @@ void calibrateMPU9250(float * dest1, float * dest2)
 // Configure FIFO to capture accelerometer and gyro data for bias calculation
   writeByte(MPU9250_ADDRESS, USER_CTRL, 0x40);   // Enable FIFO  
   writeByte(MPU9250_ADDRESS, FIFO_EN, 0x78);     // Enable gyro and accelerometer sensors for FIFO (max size 512 bytes in MPU-9250)
-  wait(0.04); // accumulate 40 samples in 80 milliseconds = 480 bytes
+  ThisThread::sleep_for(40ms); // accumulate 40 samples in 80 milliseconds = 480 bytes
 
 // At end of sample accumulation, turn off FIFO sensor read
   writeByte(MPU9250_ADDRESS, FIFO_EN, 0x00);        // Disable gyro and accelerometer sensors for FIFO
@@ -625,7 +625,7 @@ void MPU9250SelfTest(float * destination) // Should return percent deviation fro
 // Configure the accelerometer for self-test
    writeByte(MPU9250_ADDRESS, ACCEL_CONFIG, 0xE0); // Enable self test on all three axes and set accelerometer range to +/- 2 g
    writeByte(MPU9250_ADDRESS, GYRO_CONFIG, 0xE0); // Enable self test on all three axes and set gyro range to +/- 250 degrees/s
-   wait(25); // Delay a while to let the device stabilize
+   ThisThread::sleep_for(25s); // Delay a while to let the device stabilize
 
   for( int ii = 0; ii < 200; ii++) { // get average self-test values of gyro and acclerometer
   
@@ -648,7 +648,7 @@ void MPU9250SelfTest(float * destination) // Should return percent deviation fro
  // Configure the gyro and accelerometer for normal operation
    writeByte(MPU9250_ADDRESS, ACCEL_CONFIG, 0x00);
    writeByte(MPU9250_ADDRESS, GYRO_CONFIG, 0x00);
-   wait(25); // Delay a while to let the device stabilize
+   ThisThread::sleep_for(25s); // Delay a while to let the device stabilize
    
    // Retrieve accelerometer and gyro factory Self-Test Code from USR_Reg
    selfTest[0] = readByte(MPU9250_ADDRESS, SELF_TEST_X_ACCEL); // X-axis accel self-test results
